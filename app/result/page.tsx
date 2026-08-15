@@ -137,7 +137,7 @@ function ResultInner() {
     }
     setPending(true);
     setError(null);
-    const failure = await startCheckout(selectedPlan, trimmed);
+    const failure = await startCheckout(selectedPlan, trimmed, { me, you });
     if (failure) {
       setError(failure);
       setPending(false);

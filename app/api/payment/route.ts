@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import axios from "axios";
 import { PLANS, isPlanId } from "@/lib/plans";
+import { isElementId } from "@/lib/elements";
 import { resolveReturnUrl } from "@/lib/site";
 
 export const runtime = "nodejs";
@@ -18,7 +19,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Некорректный запрос." }, { status: 400 });
   }
 
-  const body = payload as { plan?: unknown; email?: unknown; returnOrigin?: unknown };
+  const body = payload as {
+    plan?: unknown;
+    email?: unknown;
+    returnOrigin?: unknown;
+    me?: unknown;
+    you?: unknown;
+  };
 
   if (!isPlanId(body.plan)) {
     return NextResponse.json({ error: "Неизвестный тариф." }, { status: 400 });
@@ -66,7 +73,14 @@ export async function POST(request: Request) {
         },
       ],
     },
-    metadata: { plan: plan.id, email },
+    // Пара стихий уезжает в metadata: вебхук больше ниоткуда её не узнает,
+    // а результат целиком определяется этими двумя значениями.
+    metadata: {
+      plan: plan.id,
+      email,
+      me: isElementId(body.me) ? body.me : "",
+      you: isElementId(body.you) ? body.you : "",
+    },
   };
 
   try {
